@@ -247,3 +247,19 @@ Homework: reading
     * Fake data simulation
     * Posterior predictive check
     * LOO influence check
+
+## Where next?
+
+I am currently planning a second semester of this course and am writing a textbook *Data Science for Ecology*. These topics will be covered in the book and a selection in future semesters and seminars:
+
+* Bayes factors
+* Permutation inference algorithms
+* rstan - beyond GLMMs, general hierarchical models
+* Machine learning: regression trees, boosting, random forests
+* Machine learning - general nonlinear models: Support Vector Machines, Neural Nets
+
+* Time series analysis
+* Spatio-temporal models
+* Structural equation models
+* Unsupervised learning (aka "multivariate statistics")
+* Ecological forecasting
