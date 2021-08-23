@@ -53,7 +53,7 @@ First test that everything works. Do this directly from your personal GitHub acc
 
 * In section 9.3 it says "you will be challenged for your GitHub username and password". GitHub has recently changed it's authentication process and traditional passwords are no longer used for this step, as explained [here](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/about-authentication-to-github#authenticating-with-the-command-line). Instead of entering a traditional password you must now enter your "personal access token" (PAT). Here's what you need to do:
   * Follow the directions [here](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) for setting up a personal access token:
-    * Where it asks to "Give your token a descriptive name", you could call it "Command line interface"
+    * Where it asks to "Give your token a descriptive name", you could call it "Git repo interface"
     * Where it asks for an expiration, choose indefinitely or the largest possibility
     * Where it asks for scope, select "repo"
   * Now you can enter your PAT when asked for a password at the command line.
