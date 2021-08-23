@@ -2,7 +2,12 @@
 1. Update R and RStudio to the latest versions.
 2. Get set up with Git and Github. Follow the instructions in
    [skills_tutorials/git01_setup.md](skills_tutorials/git01_setup.md).
-3. We'll begin Wednesday with a discussion. Read two papers and the short overview from me (see below). **Send me (email) some brief notes from your reading of the two papers: some bullet points, which might be insights or questions.**
+3. We'll begin Wednesday with a discussion. Read two papers and the short overview from me (see below).
+   * **Send me (email) some brief notes from your reading of the two papers**:
+   * Thoughts on these 2 questions:
+     * What are some goals of ecology and evolutionary biology (or what do we want to do with data)?
+     * How can the different cultures help us with these goals?
+   * 2-3 other bullet points, which might be insights or questions.
 
 #### Reading
 Read my overview:
