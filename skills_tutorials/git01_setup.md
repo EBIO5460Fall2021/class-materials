@@ -15,14 +15,16 @@ Email me your GitHub username so I can add you to the class's GitHub organizatio
 ## Install Git
 There are lots of options for Git [clients](https://en.wikipedia.org/wiki/Client_(computing)) (including GitHub desktop) but the official Git version is recommended:\
 https://git-scm.com. \
-Go to downloads and choose your operating system. This official version installs both a CLI ([command line interface](https://en.wikipedia.org/wiki/Command-line_interface)) and a GUI ([graphical user interface](https://en.wikipedia.org/wiki/Graphical_user_interface)).
+Go to downloads and choose your operating system. The current version is 2.33.0. On Windows, this official version installs both a CLI ([command line interface](https://en.wikipedia.org/wiki/Command-line_interface)) and a GUI ([graphical user interface](https://en.wikipedia.org/wiki/Graphical_user_interface)). On MacOS, it's best to install via homebrew and you need to separately install both git and git-gui.
 
 On this website there is also a section for third-party GUI clients. You can ignore this section but feel to try some out.
 
 **Windows**\
 When installing, there will be a bunch of questions. For most, the defaults are good. These two are important:
-1) Choose default editor: I suggest [nano](https://www.nano-editor.org/), or [notepad++](https://notepad-plus-plus.org/).
-2) Adjust your path environment if necessary: choose "Git from the command line and also from 3rd-party software (this is the default choice)". This is important to allow Rstudio to find Git. Depending on your Windows version and installation this may or may not work with RStudio automatically. If not, in RStudio -> Tools -> Global Options -> Git/SVN -> enter the path to git.exe (and restart Rstudio).
+
+1) Override the default branch name for new repositories: main
+2) Choose default editor - I suggest [nano](https://www.nano-editor.org/), or [notepad++](https://notepad-plus-plus.org/).
+3) Adjust your path environment if necessary - Git from the command line and also from 3rd-party software (this is the default choice). This is important to allow Rstudio to find Git. Depending on your Windows version and installation this may or may not work with RStudio automatically. If not, in RStudio -> Tools -> Global Options -> Git/SVN -> enter the path to git.exe (and restart Rstudio).
 
 **Mac**\
 If asked, install Xcode command line developer tools also.
@@ -49,15 +51,7 @@ https://swcarpentry.github.io/git-novice/02-setup.
 
 ## Set up a test Git repository (or two)
 
-First test that everything works. Do this directly from your personal GitHub account (i.e. not from the class organization at this stage), setting up public repos each time. Follow the directions in [Happy Git with R Chapter 9](http://happygitwithr.com/push-pull-github.html). Don't worry about understanding what is going on too much at this stage. Just follow the directions and type carefully (or copy and paste). Go all the way to the end, including deleting the test repo. BEWARE: a few details have changed:
-
-* In section 9.3 it says "you will be challenged for your GitHub username and password". GitHub has recently changed it's authentication process and traditional passwords are no longer used for this step, as explained [here](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/about-authentication-to-github#authenticating-with-the-command-line). Instead of entering a traditional password you must now enter your "personal access token" (PAT). Here's what you need to do:
-  * Follow the directions [here](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) for setting up a personal access token:
-    * Where it asks to "Give your token a descriptive name", you could call it "Git repo interface"
-    * Where it asks for an expiration, choose indefinitely or the largest possibility
-    * Where it asks for scope, select "repo"
-  * Now you can enter your PAT when asked for a password at the command line.
-* In section 9.5, if you find your cached credentials don't "just work" I suggest setting up cached credentials for HTTPS access because it is simpler than SSH keys. But you can certainly set up SSH keys if you prefer.
+First test that everything works. Do this directly from your personal GitHub account (i.e. not from the class organization at this stage), setting up public repos each time. Follow the directions in [Happy Git with R Chapter 9](http://happygitwithr.com/push-pull-github.html). Don't worry about understanding what is going on too much at this stage. Just follow the directions and type carefully (or copy and paste). Before you do the last part of Chapter 9 (which is to delete the test repository), follow the directions in [Chapter 10](http://happygitwithr.com/credential-caching.html) to cache credentials (username and password) for https (you can alternatively [set up SSH keys](https://happygitwithr.com/ssh-keys.html) if you prefer). Then go back to Chapter 9 to follow directions to delete the test repo from both GitHub and your computer.
 
 Now we're going to do that all again but this time with RStudio. Follow the directions in [Happy Git with R Chapter 12](http://happygitwithr.com/rstudio-git-github.html). Finish by cleaning up as directed.
 
