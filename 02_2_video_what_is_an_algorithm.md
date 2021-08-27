@@ -1,6 +1,6 @@
 ### Video mini lecture
 
-[What is an algorithm?]() (x mins) - coming soon
+[What is an algorithm?](https://www.dropbox.com/s/vvndivzctg10g88/02_vid1_what_is_an_algorithm.mp4?dl=0) (8 mins)
 
 * examples
 * structured programming
