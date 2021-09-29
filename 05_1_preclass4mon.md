@@ -23,7 +23,7 @@ Make sure you're caught up on any previous work and you've pushed all your work 
      * 2E1, 2E2, 2E3
      * 2M4, 2M5, 2M7, 2H1
      * use the counting method, i.e. draw forking paths, for the latter 4 problems
-   * Extending from 2H1, on the next birth the panda has twins. What are the likelihoods for the two models: M1 Panda is species A; M2: Panda is species B
+   * Extending from 2H1, on the next birth the panda has twins. What are the likelihoods for the two models: M1 Panda is species A; M2: Panda is species B? Recall that the likelihood is the probability of the data given the model.
    * Now calculate the likelihoods if, instead, the next birth was a singleton
    * To learn effectively, I strongly encourage you to do your own work before searching for the solutions online. I won't be scoring for correct answers.
    * **Push your answers to GitHub.** Can be a scan or photo of hand-written solutions.
