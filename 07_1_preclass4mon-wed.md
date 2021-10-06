@@ -6,11 +6,11 @@ Bayesian algorithms continued, including MCMC. I'm going to give you all the hom
 * See [repsci03_r2markdown.md](skills_tutorials/repsci03_r2markdown.md)
 * Do this for any script you submit this week (i.e. submit both the `.R` script and the `.md` version)
 
-#### 2. Set up RStan
+#### 2. Set up RStan 
 
 The `rstan` package should already be installed from when you installed McElreath's `rethinking` package. But we need to set up the R environment properly for it to work. This can be a little fussy if you have previously installed `rstan` or another package that had similar requirements or for an earlier version of R or Rtools. If you get stuck, let me know.
 
-Follow the instructions for **Configuring C++ Toolchain** at https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started. Do everything that it says! If you are on Windows, make sure you update to the most recent version of Rtools if you happen to have an older version of Rtools installed (most people won't have installed Rtools previously; uninstall the old version first using the Windows Control Panel).
+Follow the instructions for **Configuring C++ Toolchain** at https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started. Do everything that it says! If you are on Windows, make sure you update to the most recent version of Rtools if you happen to have an older version of Rtools installed (most people won't have installed Rtools previously; uninstall the old version first using the Windows Control Panel). **Addendum:** folks on **MacOS 11.x** (Big Sur) had issues using the R Toolchain installer following the above instructions. See [07_1_Rstan_MacOS_11.x.md](07_1_Rstan_MacOS_11.x.md) for what do instead, then come back here to continue with the "8 schools" test below.
 
 Restart RStudio. Test that your RStan installation works by saving the following to a file called `8schools.stan` in your working directory (**include a blank line after the final brace**). Don't worry about understanding this code and don't be intimidated by it. This is Stan's underlying code language and we won't be using this language this semester (it is an advanced option that you might get into later). For now, we'll be using higher level interfaces (like `rstanarm`) that will abstract this away.
 
