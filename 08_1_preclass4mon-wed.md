@@ -48,24 +48,20 @@ plot(fit,5)
 
 We will continue working with the ants data on Monday, sharing your ideas for analysis. Each group noticed different things and had great ideas for analysis. You also identified features of the data that would make a straight-up linear regression problematic. Here in the homework, we will dive deeper into identifying problems with the assumptions of a standard Normal linear regression model for these data.
 
-* Read in the ants data, check it,  and convert the categorical variables to a factor:
+* Read in the ants data and convert the habitat variable to a factor:
 
   ```r
-  #as.is = TRUE prevents conversion to a factor
-  ant <- read.csv("data/ants.csv", as.is = TRUE)
+  # Read in data
+  ant <- read.csv("data/ants.csv")
   
-  # Check the data
+  # Quick view of the dataframe
   head(ant)
-  class(ant$site) #etc for other variables
-  unique(ant$site) #etc
   
-  # Set factors manually
+  # Set habitat to be a factor
   ant$habitat <- factor(ant$habitat)
-  ant$site <- factor(ant$site)
   
-  # Print the column. The factor levels are shown at the end.
+  # Print the habitat column. The factor levels are shown at the end.
   ant$habitat
-  ant$site
   ```
 
 * A  factor is an R data structure for categorical variables. See `?factor`. One attribute of a factor is the *levels* of the factor, sorted alphabetically by default.
