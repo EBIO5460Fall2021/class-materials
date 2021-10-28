@@ -146,16 +146,11 @@ This is the planned timetable for covering topics this semester.
 ## Week 9
 
 * Homework: skills
-  * Tidy data
   * Data manipulation with `dplyr`
 * GLMs: ant data case study
   * Frequentist/likelihood analysis using `glm()`
   * Bayesian analysis using `stan_glm()`
 
-* Introduction to multilevel models
-  * Mathematical notation
-  * Partial pooling and shrinkage
-  * Using `lmer()`
 
 ## Week 10
 
@@ -168,11 +163,15 @@ This is the planned timetable for covering topics this semester.
   * Using `dplyr` and `ggplot`
 * Model formulae in R
   * Shorthand notation for linear model design matrix
-
-* Multilevel Normal linear models
-  * Writing the model as math
-  * Group level predictors
-  * Credible and prediction intervals
+* Introduction to multilevel models (Normal, linear)
+  * Grouping variables
+  * Fixed vs random effects
+  * Partial pooling and shrinkage
+  * Using `lmer()` and `stan_lmer()`
+* Workflow algorithm
+  * Sketch the data design
+  * Write the equations
+  * Linear model syntax
 
 Homework: reading
 
@@ -189,10 +188,7 @@ Homework: reading
   * Likelihood and Bayesian algorithms
   * Predictor variables at different scales
   * Alternative parameterizations
-* Model algorithm workflow
-  * Sketch the data design
-  * Write the equations
-  * Linear model syntax
+  * Credible and prediction intervals
 
 ## Week 12
 
