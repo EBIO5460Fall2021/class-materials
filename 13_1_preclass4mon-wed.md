@@ -1,6 +1,6 @@
 ### Week 13: Preclass preparation for Mon-Wed
 
-Binomial distribution, practice multilevel experimental design, and fitting the model in your independent project. I suggest at least (1) for Monday and (2-3) for Wednesday as background for the lecture.
+Binomial distribution, practice multilevel experimental design, and fitting the model in your independent project. I suggest at least 1-3 for Monday, 4-5 for Wednesday, and 6 as continuing progress on your individual project.
 
 #### 1. Git: collaboration
 
