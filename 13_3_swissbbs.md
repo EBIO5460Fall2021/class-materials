@@ -17,7 +17,6 @@ algorithm, i.e. rescaling parameters.
 ``` r
 library(ggplot2)
 library(dplyr)
-library(tidyr)
 theme_set(theme_bw())
 ```
 
@@ -27,8 +26,7 @@ Switzerland.
 ``` r
 swissdem <- read.csv("data/switzerland_tidy.csv")
 
-swissdem %>% 
-    ggplot() +
+ggplot(swissdem) +
     geom_raster(aes(x=x, y=y, fill=Elev_m)) +
     scale_fill_gradientn(colors=terrain.colors(22), name="Elevation (m)") + 
     coord_quickmap() +
@@ -89,8 +87,7 @@ willowtit %>%
 Plot the data
 
 ``` r
-willowtit %>% 
-    ggplot() +
+ggplot(willowtit) +
     geom_jitter(aes(x=elev, y=y.1), shape=1, size=2, height=0.01) +
     labs(x="Elevation (m)", 
          y="Occurrence", 
@@ -99,40 +96,36 @@ willowtit %>%
 
 ![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-… also summarized by binning into 500 m increments. This is a very long
-tidyverse sequence to calculate proportions. Does anybody know a better
-tidyverse way?
+… also summarized by binning into 500 m increments. We set up bins, then
+calculate the proportion present in each bin, then the midpoint of the
+bin. The mean of a binary variable (0,1) is the proportion.
 
 ``` r
 freq_table <-
     willowtit %>% 
-    group_by(bin=cut(elev, breaks=seq(0, 3000, by=500)), y.1) %>% 
-    count(name="n") %>% 
-    ungroup() %>% 
-    pivot_wider(names_from=y.1, values_from=n, values_fill=0) %>% 
-    mutate(p=`1`/(`0`+`1`)) %>% 
+    group_by(bin=cut(elev, breaks=seq(0, 3000, by=500))) %>% 
+    summarize(p=mean(y.1)) %>% 
     mutate(mid=seq(250, 3000, by=500)) 
 freq_table
 ```
 
-    ## # A tibble: 6 x 5
-    ##   bin               `0`   `1`      p   mid
-    ##   <fct>           <int> <int>  <dbl> <dbl>
-    ## 1 (0,500]            40     1 0.0244   250
-    ## 2 (500,1e+03]        65     7 0.0972   750
-    ## 3 (1e+03,1.5e+03]    25    24 0.490   1250
-    ## 4 (1.5e+03,2e+03]    16    27 0.628   1750
-    ## 5 (2e+03,2.5e+03]    21     8 0.276   2250
-    ## 6 (2.5e+03,3e+03]     3     0 0       2750
+    ## # A tibble: 6 x 3
+    ##   bin                  p   mid
+    ##   <fct>            <dbl> <dbl>
+    ## 1 (0,500]         0.0244   250
+    ## 2 (500,1e+03]     0.0972   750
+    ## 3 (1e+03,1.5e+03] 0.490   1250
+    ## 4 (1.5e+03,2e+03] 0.628   1750
+    ## 5 (2e+03,2.5e+03] 0.276   2250
+    ## 6 (2.5e+03,3e+03] 0       2750
 
 Plot including the binned proportion and a smoother on the occurrence
 data (i.e. the zeros and ones) for comparison
 
 ``` r
-willowtit %>% 
-    ggplot() +
-    geom_jitter(aes(x=elev, y=y.1), shape=1, size=2, height=0.01) +
-    geom_smooth(aes(x=elev, y=y.1), size=0.5, se=FALSE) +
+ggplot() +
+    geom_jitter(data=willowtit, aes(x=elev, y=y.1), shape=1, size=2, height=0.01) +
+    geom_smooth(data=willowtit, aes(x=elev, y=y.1), size=0.5, se=FALSE) +
     geom_line(data=freq_table, aes(x=mid, y=p), col=2) +
     geom_point(data=freq_table, aes(x=mid, y=p), shape=1, size=2, col=2) +
     coord_cartesian(ylim=c(-0.01,1.01)) +
@@ -363,8 +356,7 @@ predp <- p_pred_quadratic(fit_quadratic$par[1], fit_quadratic$par[2],
                           fit_quadratic$par[3]*1e-06, swissdem$Elev_m)
 willowtit_ras <- cbind(swissdem[,1:2],p=predp)
 
-willowtit_ras %>% 
-    ggplot() +
+ggplot(willowtit_ras) +
     geom_raster(aes(x=x, y=y, fill=p)) +
     scale_fill_gradientn(colors=heat.colors(14), name="Probability") + 
     coord_quickmap() +
@@ -435,11 +427,11 @@ print(summary(stanfit)[,c("mean","sd","n_eff","Rhat")], digits=3)
 ```
 
     ##                    mean       sd n_eff Rhat
-    ## (Intercept)   -6.62e+00 9.96e-01   965    1
-    ## elev           8.40e-03 1.47e-03   935    1
-    ## I(elev^2)     -2.57e-06 5.02e-07   950    1
-    ## mean_PPD       2.85e-01 3.83e-02  2624    1
-    ## log-posterior -1.16e+02 1.25e+00  1087    1
+    ## (Intercept)   -6.55e+00 9.65e-01   943 1.00
+    ## elev           8.29e-03 1.43e-03   922 1.01
+    ## I(elev^2)     -2.53e-06 4.95e-07   930 1.01
+    ## mean_PPD       2.84e-01 3.75e-02  2349 1.00
+    ## log-posterior -1.16e+02 1.25e+00  1054 1.00
 
 Credible intervals
 
