@@ -1,119 +1,158 @@
 Binomial GLM. Swiss breeding bird survey example
 ================
 Brett Melbourne
-16 Nov 2020
-
-Apologies for lack of ggplot here. I didn’t have time to convert this
-example. It’s always good to know base plot too!
+16 Nov 2020 (updated 16 Nov 2021)
 
 Willow tit distribution with altitude. This is an example of a nonlinear
 biological model with a binomial distribution. The model is logit-linear
 and together with the binomial distribution, this combination is the
-special case of logistic regression. The data are occurrence (presence-
-absence) of the willow tit. This example is from Royle JA & Dorazio RM
-(2008) Hierarchical Modeling and Inference in Ecology, p 87. Altitude
-data are from eros.usgs.gov. To exactly replicate the analysis on p 87,
-first rescale the elevation data: elev &lt;- scale(elev). I don’t do
-that here in order to show another strategy for fixing an algorithm -
-i.e. rescaling parameters.
-
-Read in and plot elevation data for Switzerland.
+special case of logistic regression. The data are occurrence
+(presence-absence) of the willow tit. This example is from Royle JA &
+Dorazio RM (2008) Hierarchical Modeling and Inference in Ecology, p 87.
+Altitude data are from eros.usgs.gov. To exactly replicate the analysis
+on p 87, first rescale the elevation data: `elev <- scale(elev)`. I
+don’t do that here in order to show another strategy for fixing an
+algorithm, i.e. rescaling parameters.
 
 ``` r
-swissmap <- as.matrix(read.csv("data/switzerland.csv",header=FALSE))
-swtzrlndElev <- t(swissmap)[,246:1] #Rotate matrix for plotting
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+theme_set(theme_bw())
 ```
 
+Read in and plot elevation data (digital elevation model) for
+Switzerland.
+
 ``` r
-par(mar=c(0.1,0.1,0.1,0.1),oma=c(3,1,3,8))
-cols <- c(terrain.colors(22))
-brks <- c(seq(100,4500,by=200))
-image(swtzrlndElev,col=cols,breaks=brks,axes=FALSE)
-box()
-mtext("Switzerland - elevation in metres",line=1)
-# Add a legend
-par(mar=c(0.1,0.1,0.1,3.1),oma=c(3,43,3,1),new=TRUE)
-z <- matrix(1,nrow=length(cols),ncol=1)
-barplot(z,col=cols,axes=FALSE)
-axis(4, at = seq(0,22,2),labels=brks[seq(1,23,2)],lwd=0,lwd.ticks=1,las=1)
+swissdem <- read.csv("data/switzerland_tidy.csv")
+
+swissdem %>% 
+    ggplot() +
+    geom_raster(aes(x=x, y=y, fill=Elev_m)) +
+    scale_fill_gradientn(colors=terrain.colors(22), name="Elevation (m)") + 
+    coord_quickmap() +
+    labs(title="Switzerland: DEM") +
+    theme_void() +
+    theme(plot.title=element_text(hjust=0.5, vjust=-2))
 ```
 
 ![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-Read in the bird data
+Read in the bird data. The dataset is from Royle & Dorazio. We will
+focus for now on the occurrence data from year 1 in the column `y.1`.
 
 ``` r
-willowtit_data <- read.csv("data/wtmatrix.csv")  #Dataset from Royle & Dorazio
-occ <- willowtit_data[,"y.1"]  #The occurrence data
-elev <- willowtit_data[,"elev"]
-cbind(occ,elev)[1:30,] #Take a look at the first 30 rows of data
+willowtit <- read.csv("data/wtmatrix.csv") 
 ```
 
-    ##       occ elev
-    ##  [1,]   0  420
-    ##  [2,]   0  450
-    ##  [3,]   0 1050
-    ##  [4,]   0 1110
-    ##  [5,]   0  510
-    ##  [6,]   0  630
-    ##  [7,]   0  590
-    ##  [8,]   0  530
-    ##  [9,]   1 1140
-    ## [10,]   0  770
-    ## [11,]   0 1220
-    ## [12,]   0  460
-    ## [13,]   0 1010
-    ## [14,]   0  760
-    ## [15,]   1 1300
-    ## [16,]   1 1270
-    ## [17,]   0  380
-    ## [18,]   1  550
-    ## [19,]   0  390
-    ## [20,]   0 1380
-    ## [21,]   0  530
-    ## [22,]   0 1190
-    ## [23,]   1 1490
-    ## [24,]   0  920
-    ## [25,]   0  620
-    ## [26,]   0  540
-    ## [27,]   1  820
-    ## [28,]   1 1220
-    ## [29,]   1 1180
-    ## [30,]   0  730
+Here’s the first 30 rows of data
+
+``` r
+willowtit %>% 
+    select(y.1,elev) %>% 
+    head(n=30)
+```
+
+    ##    y.1 elev
+    ## 1    0  420
+    ## 2    0  450
+    ## 3    0 1050
+    ## 4    0 1110
+    ## 5    0  510
+    ## 6    0  630
+    ## 7    0  590
+    ## 8    0  530
+    ## 9    1 1140
+    ## 10   0  770
+    ## 11   0 1220
+    ## 12   0  460
+    ## 13   0 1010
+    ## 14   0  760
+    ## 15   1 1300
+    ## 16   1 1270
+    ## 17   0  380
+    ## 18   1  550
+    ## 19   0  390
+    ## 20   0 1380
+    ## 21   0  530
+    ## 22   0 1190
+    ## 23   1 1490
+    ## 24   0  920
+    ## 25   0  620
+    ## 26   0  540
+    ## 27   1  820
+    ## 28   1 1220
+    ## 29   1 1180
+    ## 30   0  730
 
 Plot the data
 
 ``` r
-plot(elev,occ,xlab="Elevation (m)",ylab="Occurrence",
-     main="Willow tits in Switzerland")
-```
-
-![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-``` r
-occtab <- table(occ,cut(elev,breaks=seq(0,3000,by=500)))
-freq <- occtab[2,]/colSums(occtab)
-```
-
-… also summarized by binning into 500 m increments
-
-``` r
-plot(seq(250,3000,by=500),freq,xlim=c(0,3000),xlab="Elevation (m)",
-    ylab="Frequency of occurrence",type="o")
-abline(v=seq(0,3000,by=500),col="gray",lty=2)
-mtext("Relationship appears humped",line=1)
+willowtit %>% 
+    ggplot() +
+    geom_jitter(aes(x=elev, y=y.1), shape=1, size=2, height=0.01) +
+    labs(x="Elevation (m)", 
+         y="Occurrence", 
+         title="Occurrence of willow tit in Switzerland")
 ```
 
 ![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+… also summarized by binning into 500 m increments. This is a very long
+tidyverse sequence to calculate proportions. Does anybody know a better
+tidyverse way?
+
+``` r
+freq_table <-
+    willowtit %>% 
+    group_by(bin=cut(elev, breaks=seq(0, 3000, by=500)), y.1) %>% 
+    count(name="n") %>% 
+    ungroup() %>% 
+    pivot_wider(names_from=y.1, values_from=n, values_fill=0) %>% 
+    mutate(p=`1`/(`0`+`1`)) %>% 
+    mutate(mid=seq(250, 3000, by=500)) 
+freq_table
+```
+
+    ## # A tibble: 6 x 5
+    ##   bin               `0`   `1`      p   mid
+    ##   <fct>           <int> <int>  <dbl> <dbl>
+    ## 1 (0,500]            40     1 0.0244   250
+    ## 2 (500,1e+03]        65     7 0.0972   750
+    ## 3 (1e+03,1.5e+03]    25    24 0.490   1250
+    ## 4 (1.5e+03,2e+03]    16    27 0.628   1750
+    ## 5 (2e+03,2.5e+03]    21     8 0.276   2250
+    ## 6 (2.5e+03,3e+03]     3     0 0       2750
+
+Plot including the binned proportion and a smoother on the occurrence
+data (i.e. the zeros and ones) for comparison
+
+``` r
+willowtit %>% 
+    ggplot() +
+    geom_jitter(aes(x=elev, y=y.1), shape=1, size=2, height=0.01) +
+    geom_smooth(aes(x=elev, y=y.1), size=0.5, se=FALSE) +
+    geom_line(data=freq_table, aes(x=mid, y=p), col=2) +
+    geom_point(data=freq_table, aes(x=mid, y=p), shape=1, size=2, col=2) +
+    coord_cartesian(ylim=c(-0.01,1.01)) +
+    labs(x="Elevation (m)", 
+         y="Occurrence (or proportion)", 
+         title="Relationship appears humped")
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ## Binomial GLM the hard way
 
 We’ll first do this the hard way by coding the likelihood and optimizing
 directly. I’m doing this to show the structure of the analysis and the
 general algorithm. You won’t do this for ordinary binomial GLMs like
-this example because you can use the one-line tool `glm()` that does the
-same thing and `stan_glm()` for the Bayesian version with sensible
-priors (see further below).
+this example because you can use `glm()` that does the same thing and
+`stan_glm()` for the Bayesian version with sensible priors (see further
+below).
 
 ### The linear predictor
 
@@ -132,9 +171,9 @@ probability scale. This function is calculating the predicted
 probability.
 
 ``` r
-p_pred_quadratic  <- function( b0, b1, b2, elev ) {
+p_pred_quadratic  <- function(b0, b1, b2, elev) {
     lp <- b0 + b1 * elev + b2 * elev^2   #logit p
-    prob <- exp(lp)/(1+exp(lp))          #antilogit
+    prob <- exp(lp) / (1 + exp(lp))      #antilogit
     return(prob)
 }
 ```
@@ -146,15 +185,16 @@ direct search showed that
 ![\\beta\_2](https://latex.codecogs.com/png.latex?%5Cbeta_2 "\beta_2")
 is several orders of magnitude smaller than the other parameters.
 Optimization is better behaved if all parameters are on similar scales.
-We use a simple trick here, which is to pass nll a parameter on a
-similar scale to the others but then rescale the parameter in the nll
-function.
+We use a simple trick here, which is to pass `quadratic_nll` a parameter
+with a similar magnitude to the other parameters but then rescale the
+parameter in the `quadratic_nll` function back to its original
+magnitude.
 
 ``` r
-quadratic_nll <- function(p,occ,elev){
+quadratic_nll <- function(p, occ, elev) {
     b2 <- p[3] * 1e-06  #Rescale
-    ppred <- p_pred_quadratic(b0=p[1],b1=p[2],b2,elev)
-    nll <- -sum(dbinom(occ,size=1,prob=ppred,log=TRUE))
+    ppred <- p_pred_quadratic(b0=p[1], b1=p[2], b2, elev)
+    nll <- -sum(dbinom(occ, size=1, prob=ppred, log=TRUE))
     return(nll)
 }
 ```
@@ -169,12 +209,12 @@ par <- c(-8,0.02,-3)
 Now find the MLE using `optim()` with the Nelder-Mead algorithm
 
 ``` r
-fit_quadratic <- optim(par,quadratic_nll,occ=occ,elev=elev)
+fit_quadratic <- optim(par, quadratic_nll, occ=willowtit$y.1, elev=willowtit$elev)
 ```
 
 Here are the results of the fit.
 ![\\beta\_2](https://latex.codecogs.com/png.latex?%5Cbeta_2 "\beta_2")
-is par\[3\]\*1e-06. Convergence was confirmed.
+is `par[3]*1e-06`. Convergence was confirmed.
 
 ``` r
 fit_quadratic
@@ -196,19 +236,28 @@ fit_quadratic
     ## $message
     ## NULL
 
-Plot the fitted model with the data
+Form predictions from the fitted model
 
 ``` r
-plot(elev,occ,xlab="Elevation",ylab="Probability of occurrence")
-elevxx <- seq(min(elev),max(elev), length.out=100) #grid for the x axis
-predp <- p_pred_quadratic(fit_quadratic$par[1],fit_quadratic$par[2],
-                          fit_quadratic$par[3]*1e-06,elevxx)
-lines(elevxx,predp)
-points(seq(250,3000,by=500),freq,col="red")
-legend(2000,0.9,c("Data","Freq, 500m bins"),col=c("black","red"),pch=1)
+elevxx <- seq(min(willowtit$elev), max(willowtit$elev), length.out=100) #grid for the x axis
+predp <- p_pred_quadratic(fit_quadratic$par[1], fit_quadratic$par[2],
+                          fit_quadratic$par[3]*1e-06, elevxx)
+preds_quad <- data.frame(elev=elevxx, p=predp)
 ```
 
-![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+Plot the fitted model
+
+``` r
+ggplot() +
+    geom_point(data=freq_table, aes(x=mid, y=p), shape=1, size=2) +
+    geom_line(data=preds_quad, aes(x=elev, y=p)) +
+    coord_cartesian(ylim=c(0,1)) +
+    labs(x="Elevation (m)", 
+         y="Probability of occurrence",
+         title="Fitted model compared to binned proportions")
+```
+
+![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### Test of the hump hypothesis
 
@@ -229,19 +278,19 @@ Note that the backtransformed function
 is still a nonlinear function (sigmoid).
 
 ``` r
-p_pred_linear  <- function( b0, b1, elev ) {
-    lp <- b0 + b1 * elev            #logit probability
-    prob <- exp(lp)/(1+exp(lp))     #antilogit
+p_pred_linear  <- function(b0, b1, elev) {
+    lp <- b0 + b1 * elev             #logit probability
+    prob <- exp(lp) / (1 + exp(lp))  #antilogit
     return(prob)
 }
 
-linear_nll <- function( p, occ, elev ) {
-    ppred <- p_pred_linear(b0=p[1],b1=p[2],elev)
-    nll <- -sum(dbinom(occ,size=1,prob=ppred,log=TRUE))
+linear_nll <- function(p, occ, elev) {
+    ppred <- p_pred_linear(b0=p[1], b1=p[2], elev)
+    nll <- -sum(dbinom(occ, size=1, prob=ppred, log=TRUE))
     return(nll)
 }
 par <- c(-3,0.001) #Starting parameters from direct search
-fit_linear <- optim(par,linear_nll,occ=occ,elev=elev)
+fit_linear <- optim(par, linear_nll, occ=willowtit$y.1, elev=willowtit$elev)
 fit_linear #Convergence is good.
 ```
 
@@ -261,21 +310,29 @@ fit_linear #Convergence is good.
     ## $message
     ## NULL
 
+Form predictions from the fitted model
+
+``` r
+elevxx <- seq(min(willowtit$elev), max(willowtit$elev), length.out=100) #grid for the x axis
+predp <- p_pred_linear(fit_linear$par[1], fit_linear$par[2], elevxx)
+preds_lin <- data.frame(elev=elevxx, p=predp)
+```
+
 Plot the fitted reduced model (blue) with the data. It’s clear that the
 hump model is a much better description of the data.
 
 ``` r
-plot(elev,occ,xlab="Elevation",ylab="Probability of occurrence")
-elevxx <- seq(min(elev),max(elev), length.out=100) #grid for the x axis
-lines(elevxx,p_pred_linear(fit_linear$par[1],fit_linear$par[2],
-                           elevxx),col="blue")
-lines(elevxx,p_pred_quadratic(fit_quadratic$par[1],fit_quadratic$par[2],
-                          fit_quadratic$par[3]*1e-06,elevxx))
-points(seq(250,3000,by=500),freq,col="red")
-legend(2000,0.9,c("Data","Freq, 500m bins"),col=c("black","red"),pch=1)
+ggplot() +
+    geom_point(data=freq_table, aes(x=mid, y=p), shape=1, size=2) +
+    geom_line(data=preds_quad, aes(x=elev, y=p)) +
+    geom_line(data=preds_lin, aes(x=elev, y=p), col="blue") +
+    coord_cartesian(ylim=c(0,1)) +
+    labs(x="Elevation (m)", 
+         y="Probability of occurrence",
+         title="Fitted models compared to binned proportions")
 ```
 
-![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 The NHST is based on the frequentist likelihood ratio test. The deviance
 (a scaled likelihood ratio) of the null model theoretically has a
@@ -285,52 +342,46 @@ better model.
 ``` r
 nll_H0 <- fit_linear$value
 nll_H1 <- fit_quadratic$value
-deviance <- 2 * ( nll_H0 - nll_H1 )
+deviance <- 2 * (nll_H0 - nll_H1)
 deviance
 ```
 
     ## [1] 44.39716
 
 ``` r
-1 - pchisq(deviance,df=1)  #This is the P-value. Significant at alpha < 0.05.
+1 - pchisq(deviance, df=1)  #This is the P-value. Significant at alpha < 0.05.
 ```
 
     ## [1] 2.680756e-11
 
 ### Plot predictions as a map
 
-… for the best fitting (quadratic) model
+… for the best-fitting (quadratic) model
 
 ``` r
-predp <- p_pred_quadratic(fit_quadratic$par[1],fit_quadratic$par[2],
-                          fit_quadratic$par[3]*1e-06,swtzrlndElev)
-#min(predp) #To get good bounds for the color scale
-#max(predp)
+predp <- p_pred_quadratic(fit_quadratic$par[1], fit_quadratic$par[2],
+                          fit_quadratic$par[3]*1e-06, swissdem$Elev_m)
+willowtit_ras <- cbind(swissdem[,1:2],p=predp)
+
+willowtit_ras %>% 
+    ggplot() +
+    geom_raster(aes(x=x, y=y, fill=p)) +
+    scale_fill_gradientn(colors=heat.colors(14), name="Probability") + 
+    coord_quickmap() +
+    labs(title="Probability of observing a willow tit in year 1") +
+    theme_void() +
+    theme(plot.title=element_text(hjust=0.5, vjust=-2))
 ```
 
-``` r
-par(mar=c(0.1,0.1,0.1,0.1),oma=c(3,1,3,8))
-cols <- c(heat.colors(14))
-brks <- c(seq(0,0.7,length.out=15))
-image(predp,col=cols,breaks=brks,axes=FALSE)
-box()
-mtext("Predicted probability of willow tit occurrence",line=1)
-# Legend
-par(mar=c(0.1,0.1,0.1,3.1),oma=c(3,43,3,1),new=TRUE)
-z <- matrix(1,nrow=length(cols),ncol=1)
-barplot(z,col=cols,axes=FALSE)
-axis(4, at = seq(0,14,2),labels=brks[seq(1,15,2)],lwd=0,lwd.ticks=1,las=1)
-```
-
-![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ### Built-in tools for GLMs
 
 Here is the equivalent likelihood analysis using `glm()`.
 
 ``` r
-glm_quadratic <- glm(occ ~ elev + I(elev^2), family=binomial) 
-glm_linear <- glm(occ ~ elev, family=binomial)
+glm_quadratic <- glm(y.1 ~ elev + I(elev^2), family=binomial, data=willowtit) 
+glm_linear <- glm(y.1 ~ elev, family=binomial, data=willowtit)
 ```
 
 Likelihood ratio test. Notice that the deviance and p value are the same
@@ -338,13 +389,13 @@ as the MLE analysis above. The residual deviance is 2X the nll
 (e.g. compare 2\*nll\_H1 from above).
 
 ``` r
-anova(glm_linear,glm_quadratic,test="Chisq")    
+anova(glm_linear, glm_quadratic, test="Chisq")    
 ```
 
     ## Analysis of Deviance Table
     ## 
-    ## Model 1: occ ~ elev
-    ## Model 2: occ ~ elev + I(elev^2)
+    ## Model 1: y.1 ~ elev
+    ## Model 2: y.1 ~ elev + I(elev^2)
     ##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)    
     ## 1       235     255.76                         
     ## 2       234     211.37  1   44.397 2.68e-11 ***
@@ -363,7 +414,7 @@ glm_quadratic  #Residual deviance is 2*nll, compare 2*nll_H1 from above
 ```
 
     ## 
-    ## Call:  glm(formula = occ ~ elev + I(elev^2), family = binomial)
+    ## Call:  glm(formula = y.1 ~ elev + I(elev^2), family = binomial, data = willowtit)
     ## 
     ## Coefficients:
     ## (Intercept)         elev    I(elev^2)  
@@ -377,7 +428,42 @@ The Bayesian version is
 
 ``` r
 library(rstanarm)
-options(mc.cores = parallel::detectCores())
-stanfit <- stan_glm(occ ~ elev + I(elev^2), family=binomial, data=data.frame(occ,elev))
-print(summary(stanfit)[,c("mean","sd","n_eff","Rhat")],digits=3)
+source("source/hpdi.R")
+options(mc.cores=parallel::detectCores())
+stanfit <- stan_glm(y.1 ~ elev + I(elev^2), family=binomial, data=willowtit)
+print(summary(stanfit)[,c("mean","sd","n_eff","Rhat")], digits=3)
 ```
+
+    ##                    mean       sd n_eff Rhat
+    ## (Intercept)   -6.62e+00 9.96e-01   965    1
+    ## elev           8.40e-03 1.47e-03   935    1
+    ## I(elev^2)     -2.57e-06 5.02e-07   950    1
+    ## mean_PPD       2.85e-01 3.83e-02  2624    1
+    ## log-posterior -1.16e+02 1.25e+00  1087    1
+
+Credible intervals
+
+``` r
+newd <- data.frame(elev=seq(min(willowtit$elev),max(willowtit$elev),length.out=100))
+#pmu <- posterior_linpred(stanfit, transform=TRUE, newdata=newd)
+pmu <- posterior_epred(stanfit, newdata=newd)
+mnmu <- colMeans(pmu)
+regression_intervals <- t(apply(pmu, 2, hpdi, prob=0.95)) #CPI was no good
+colnames(regression_intervals) <- c("mulo95","muhi95")
+mcpreds_df <- cbind(newd,mnmu,regression_intervals)
+
+ggplot() +
+    geom_point(data=freq_table, aes(x=mid, y=p), shape=1, size=2) +
+    geom_ribbon(data=mcpreds_df, aes(x=elev, ymin=mulo95, ymax=muhi95),
+        alpha=0.2) +
+    geom_line(data=mcpreds_df, aes(x=elev, y=mnmu), col="blue") +
+    coord_cartesian(ylim=c(0,1)) +
+    labs(x="Elevation (m)", 
+         y="Probability of occurrence",
+         title="Fitted model with 95% credible intervals compared to binned proportions")
+```
+
+![](13_3_swissbbs_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+The Bayesian model has a more gentle estimate for the quadratic
+parameter.
