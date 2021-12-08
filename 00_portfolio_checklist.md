@@ -1,8 +1,14 @@
 ### Checklist for your GitHub portfolio
 
-Your grade is based on completion of required elements (everything marked as "push to GitHub" in homework plus all the elements of the individual project. This is what you need to have completed and uploaded to GitHub. Please make it easy for me to find these, preferably by naming your script files by week or organizing them into weekly folders.
 
 
+Due date: 15 December 11:59 PM
+
+Your grade is based on completion of required elements (everything marked as "push to GitHub" in homework plus all the elements of the individual project). This is what you need to have completed and uploaded to GitHub. Please make it easy for me to find these, preferably by naming your script files by week or organizing them into weekly folders, and collecting all the individual project files together.
+
+
+
+Weekly tasks
 
 - [ ] week 2 initial lm analysis
 - [ ] week 2 workflow algorithm
