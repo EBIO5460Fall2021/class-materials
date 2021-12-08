@@ -13,11 +13,16 @@ See [00_individual_project.md](00_individual_project.md) to be reminded of the g
 #### 3. Fake data simulation
 
 * Reading and code exploration: [15_2_sim_multilevel.md](15_2_sim_multilevel.md).
-* TBA lecture video and notes?
+* Lecture video
+  * [15_3_slides_simulated_data.pdf](15_3_slides_simulated_data.pdf)
+  * [15_3_video_simulated_data.md](15_3_video_simulated_data.md)
+
+* Ants example: [15_4_ants_simulated_data.md](15_4_ants_simulated_data.md)
 
 #### 4. Posterior predictive check
 
-* TBA
+* Background reading in [15_2_sim_multilevel.md](15_2_sim_multilevel.md)
+* Code for ants example:  [15_5_ants_bayes_diagnostics.md](15_5_ants_bayes_diagnostics.md)
 
 #### 5. Fake data simulation for your data
 
